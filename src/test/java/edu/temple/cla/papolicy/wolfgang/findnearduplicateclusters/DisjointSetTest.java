@@ -1,11 +1,14 @@
+package edu.temple.cla.papolicy.wolfgang.findnearduplicateclusters;
+
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
 
-package edu.temple.cla.papolicy.wolfgang.findnearduplicates;
 
-import edu.temple.cis.wolfgang.util.DisjointSet;
+
+
+import edu.temple.cla.papolicy.wolfgang.findnearduplcateclusters.DisjointSet;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -41,14 +44,14 @@ public class DisjointSetTest {
         System.out.println("iterator");
         Integer[] theArray = {1,2,3,4,5};
         DisjointSet<Integer> instance = 
-                new DisjointSet<Integer>(Arrays.asList(theArray));
+                new DisjointSet<>(Arrays.asList(theArray));
         Iterator<Integer> result = instance.iterator();
-        Set<Integer> contents = new HashSet<Integer>();
+        Set<Integer> contents = new HashSet<>();
         while (result.hasNext()) {
             contents.add(result.next());
         }
         Set<Integer> expectedContents = 
-                new HashSet<Integer>(Arrays.asList(theArray));
+                new HashSet<>(Arrays.asList(theArray));
         assertEquals(contents, expectedContents);
     }
 
@@ -60,15 +63,15 @@ public class DisjointSetTest {
         System.out.println("setIterator");
         Integer[] theArray = {1,2,3,4,5};
         DisjointSet<Integer> instance = 
-                new DisjointSet<Integer>(Arrays.asList(theArray));
+                new DisjointSet<>(Arrays.asList(theArray));
         Iterator<Set<Integer>> result = instance.setIterator();
-        Set<Set<Integer>> contents = new HashSet<Set<Integer>>();
+        Set<Set<Integer>> contents = new HashSet<>();
         while (result.hasNext()) {
             contents.add(result.next());
         }
-        Set<Set<Integer>> expectedContents = new HashSet<Set<Integer>>();
+        Set<Set<Integer>> expectedContents = new HashSet<>();
         for (Integer i: theArray) {
-            Set<Integer> s = new HashSet<Integer>();
+            Set<Integer> s = new HashSet<>();
             s.add(i);
             expectedContents.add(s);
         }
@@ -79,12 +82,10 @@ public class DisjointSetTest {
      * Internal method to generate expected result
      */
     private Set<Set<Integer>> expectedResult(Integer[][] a) {
-        HashSet<Set<Integer>> result = new HashSet<Set<Integer>>();
-        for (int i = 0; i < a.length; i++) {
-            Set<Integer> s = new HashSet<Integer>();
-            for (int j = 0; j < a[i].length; j++) {
-                s.add(a[i][j]);
-            }
+        HashSet<Set<Integer>> result = new HashSet<>();
+        for (Integer[] a1 : a) {
+            Set<Integer> s = new HashSet<>();
+            s.addAll(Arrays.asList(a1));
             result.add(s);
         }
         return result;
@@ -98,10 +99,10 @@ public class DisjointSetTest {
         System.out.println("union test 1");
         Integer[] theArray = {1,2,3,4,5};
         DisjointSet<Integer> instance = 
-                new DisjointSet<Integer>(Arrays.asList(theArray));
+                new DisjointSet<>(Arrays.asList(theArray));
         instance.union(1, 3);
         Iterator<Set<Integer>> result = instance.setIterator();
-        Set<Set<Integer>> contents = new HashSet<Set<Integer>>();
+        Set<Set<Integer>> contents = new HashSet<>();
         while (result.hasNext()) {
             contents.add(result.next());
         }
@@ -118,11 +119,11 @@ public class DisjointSetTest {
         System.out.println("union test 2");
         Integer[] theArray = {1,2,3,4,5};
         DisjointSet<Integer> instance = 
-                new DisjointSet<Integer>(Arrays.asList(theArray));
+                new DisjointSet<>(Arrays.asList(theArray));
         instance.union(1, 3);
         instance.union(3, 5);
         Iterator<Set<Integer>> result = instance.setIterator();
-        Set<Set<Integer>> contents = new HashSet<Set<Integer>>();
+        Set<Set<Integer>> contents = new HashSet<>();
         while (result.hasNext()) {
             contents.add(result.next());
         }
@@ -139,7 +140,7 @@ public class DisjointSetTest {
         System.out.println("add");
         Integer[] theArray = {1,2,3,4,5};
         DisjointSet<Integer> instance = 
-                new DisjointSet<Integer>(Arrays.asList(theArray));
+                new DisjointSet<>(Arrays.asList(theArray));
         boolean exceptionThrown = false;
         try {
             instance.add(0);
@@ -157,10 +158,10 @@ public class DisjointSetTest {
         System.out.println("remove");
         Integer[] theArray = {1,2,3,4,5};
         DisjointSet<Integer> instance = 
-                new DisjointSet<Integer>(Arrays.asList(theArray));
+                new DisjointSet<>(Arrays.asList(theArray));
         boolean exceptionThrown = false;
         try {
-            instance.remove(new Integer(0));
+            instance.remove(0);
         } catch (UnsupportedOperationException ex) {
             exceptionThrown = true;
         }
