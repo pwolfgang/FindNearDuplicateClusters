@@ -40,31 +40,44 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringJoiner;
 
 /**
- * Class to represent a set of disjoint set.
- * Initially the set consists of singletons.
- * A disjoint set may be found by selecting any member.
- * Two disjoint sets may be merged.
+ * Class to represent a set of disjoint sets. When first constructed, the set
+ * consists of singletons. A disjoint set is immutable in that after construction
+ * no elements may be added or removed. However, elements may be merged.
+ * This data structure is described by
+ * <a href="https://mitpress.mit.edu/books/introduction-algorithms-third-edition">
+ * Cormen </a>
+ *
  * @author Paul Wolfgang
  * @param <E> The element type.
  */
-public class DisjointSet<E> extends AbstractSet<E> {
-    
-    /** Class to represent the nodes of the disjoint set trees */
+public class DisjointSet<E> extends AbstractSet<Set<E>> {
+
+    /**
+     * Class to represent the nodes of the disjoint set trees
+     */
     private static class Node<E> {
+
         private final E item;
         private Node<E> parent;
         private final List<Node<E>> children;
         private int rank;
-        public Node (E e) {
+
+        public Node(E e) {
             item = e;
             parent = this;
             children = new ArrayList<>();
             rank = 0;
         }
     }
-    
+
+    /**
+     * Find the tree that contains this element.
+     * @param x The element being sought.
+     * @return The root Node of the tree containing this element.
+     */
     private Node<E> findSet(Node<E> x) {
         if (x != x.parent) {
             Node<E> p = findSet(x.parent);
@@ -74,9 +87,16 @@ public class DisjointSet<E> extends AbstractSet<E> {
         }
         return x.parent;
     }
-    
+
+    /**
+     * Merge two sets.
+     * @param x The root element of one set.
+     * @param y The root element of the other set.
+     */
     private void link(Node<E> x, Node<E> y) {
-        if (x == y) return;
+        if (x == y) {
+            return;
+        }
         if (x.rank > y.rank) {
             x.children.add(y);
             y.parent = x;
@@ -90,36 +110,40 @@ public class DisjointSet<E> extends AbstractSet<E> {
             theSet.remove(x);
         }
     }
-    
-    /** Map between elements of the disjoint set an their nodes within
-     *  the disjoint tree forest.
+
+    /**
+     * Map between elements of the disjoint set an their nodes within the
+     * disjoint tree forest.
      */
     private final Map<E, Node<E>> theMap = new HashMap<>();
-    
-    /** The set of roots to the disjoint set trees */
+
+    /**
+     * The set of roots to the disjoint set trees
+     */
     private final Set<Node<E>> theSet = new HashSet<>();
-    
-    /** Return the size of the disjoint Set
-     * @return  The size of the disjoint set
+
+    /**
+     * Return the size of the disjoint Set
+     *
+     * @return The size of the disjoint set
      */
     @Override
-    public int size() {return theMap.size();}
-    
-    /** Return the number of disjoint sets
-     * @return the number of disjoint sets 
-     */
-    public int getNumSets() {
+    public int size() {
         return theSet.size();
     }
 
-    /** Return an iterator
-     * @return  an iterator to the contents of the set
+    /**
+     * Return the number of disjoint sets
+     *
+     * @return the number of disjoint sets
      */
-    @Override
-    public Iterator<E> iterator() {return theMap.keySet().iterator();}
-    
-    
-    /** Create a new DisjointSet from an existing collection
+    public int getNumElements() {
+        return theMap.size();
+    }
+
+    /**
+     * Create a new DisjointSet from an existing collection
+     *
      * @param c The collection to initialize the set.
      */
     public DisjointSet(Collection<E> c) {
@@ -129,71 +153,100 @@ public class DisjointSet<E> extends AbstractSet<E> {
             theSet.add(n);
         });
     }
-    
-    /** Creating an empty DisjointSet is prohibited */
+
+    /**
+     * Creating an empty DisjointSet is prohibited
+     */
     private DisjointSet() {
         throw new UnsupportedOperationException("Creating an empty Disjoint Set");
     }
-    
-    /** Convert a DisjointSet Tree into a Set */
+
+    /**
+     * Convert a DisjointSet Tree into a Set
+     */
     private Set<E> toSet(Node<E> n) {
         Set<E> result = new HashSet<>();
         toSet(result, n);
         return result;
     }
-    
+
     private void toSet(Set<E> s, Node<E> n) {
         s.add(n.item);
         n.children.forEach(child -> toSet(s, child));
     }
-    
+
     private class DisjointSetIterator implements Iterator<Set<E>> {
+
         private final Iterator<Node<E>> internalIterator;
+
         public DisjointSetIterator(Set<Node<E>> roots) {
             internalIterator = roots.iterator();
         }
-             
+
         @Override
-        public boolean hasNext() {return internalIterator.hasNext();}
-        
+        public boolean hasNext() {
+            return internalIterator.hasNext();
+        }
+
         @Override
-        public Set<E> next() {return toSet(internalIterator.next());}
-        
+        public Set<E> next() {
+            return toSet(internalIterator.next());
+        }
+
         @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }
     }
-    
-    /** Return an iterator to the disjoint sets
+
+    /**
+     * Return an iterator to the disjoint sets
+     *
      * @return an iterator to the disjoint sets
      */
-    public Iterator<Set<E>> setIterator() {
+    @Override
+    public Iterator<Set<E>> iterator() {
         return new DisjointSetIterator(theSet);
     }
-    
-    /** Add is not a supported operation */
+
+    /**
+     * Add is not a supported operation.
+     *
+     * @param e Element to be added.
+     * @return Does not return
+     * @throws UnsupportedOperationException is always thrown.
+     */
     @Override
-    public boolean add(E e) {
+    public boolean add(Set<E> e) {
         throw new UnsupportedOperationException("Add not supported");
     }
-    
-    /** Remove is not a supported operation */
+
+    /**
+     * Remove is not a supported operation.
+     *
+     * @param o The object to be removed
+     * @return Does not return a value
+     * @throws UnsupportedOperationException is always thrown.
+     */
     @Override
     public boolean remove(Object o) {
         throw new UnsupportedOperationException("Remove not supported");
     }
-    
-    /** Returns true of this Set contains a specified element
+
+    /**
+     * Returns true of this Set contains a specified element
+     *
      * @param o The element to be sought
-     * @return  true if the set contains o
+     * @return true if the set contains o
      */
     @Override
-    public boolean contains (Object o) {
+    public boolean contains(Object o) {
         return theMap.keySet().contains(o);
     }
-    
-    /** Form the union of two disjoint sets
+
+    /**
+     * Form the union of two disjoint sets
+     *
      * @param e1 An element in the first set
      * @param e2 An element in the second set
      */
@@ -203,20 +256,16 @@ public class DisjointSet<E> extends AbstractSet<E> {
         link(n1, n2);
     }
 
+    /**
+     * Return a string representation.
+     *
+     * @return The elements as sets separated by commas, enclosed in { .. }
+     */
     @Override
     public String toString() {
-        StringBuilder stb = new StringBuilder();
-        stb.append("{");
-        Iterator<Set<E>> itr = setIterator();
-        if (itr.hasNext()) {
-            stb.append(itr.next().toString());
-        }
-        while (itr.hasNext()) {
-            stb.append(", ");
-            stb.append(itr.next().toString());
-        }
-        stb.append("}");
-        return stb.toString();
+        StringJoiner sj = new StringJoiner(", ", "{", "}");
+        this.forEach(e -> sj.add(e.toString()));
+        return sj.toString();
     }
-    
+
 }
