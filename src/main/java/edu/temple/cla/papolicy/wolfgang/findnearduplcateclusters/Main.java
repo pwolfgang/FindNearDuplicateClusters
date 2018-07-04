@@ -97,7 +97,7 @@ public class Main implements Callable<Void> {
             description = "The maximum number of clusters to be computed")
     private int maxClusters = 0;
 
-    @CommandLine.Option(names = "--target_session",
+    @CommandLine.Option(names = "--target_session", required = true,
             description = "The start year of the session just coded")
     private String targetSession;
 

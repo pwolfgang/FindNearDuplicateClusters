@@ -26,10 +26,10 @@ by the JVM</dd>
 <dl>--output_table_name</dl><dd>Table where output is to be inserted.</dd>
 <dl>--cluster_column</dl><dd>Column where the result is set</dd> 
 <dl>--remove_stopwords [TRUE|FALSE|language]</dl>
-<dd>If true, remove common “stop words” from the text using language specific 
-stop words defined by Chris Buckley and Gerard Salton. If a language is omitted, 
-the stop words are those provided by Porter.
-  Default is true</dd>
+<dd>If true, remove common “stop words” from the text stop words defined by 
+<a href="http://www.lextek.com/manuals/onix/stopwords2.html"> Chris Buckley 
+and Gerard Salton</a>. If a language is specified, the stop words are those 
+provided by Porter. Default is true</dd>
 <dl>--do_stemming [TRUE|FALSE|language]</dl>
 <dd>If true, pass all words through the Porter stemmer. If a language is specified
  pass all words through a language-specific stemmer. The language specific 
