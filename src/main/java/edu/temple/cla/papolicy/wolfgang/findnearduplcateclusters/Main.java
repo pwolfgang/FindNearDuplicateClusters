@@ -199,7 +199,10 @@ public class Main implements Callable<Void> {
                 }
             }
         }
+        System.out.println("Done Computing dot products");
+        System.out.println("Filtering clusters");
         List<List<Integer>> clusters = filterClusters(d, ids, codes);
+        System.out.println("Assigning cluster ID");
         int clusterCount = clusters.size();
         Integer[] cluster = new Integer[numRows];
         for (int i = 0; i < clusters.size(); i++) {
@@ -208,9 +211,10 @@ public class Main implements Callable<Void> {
                 cluster[index] = i;
             }
         }
+        System.out.println("Updating Database");
         Util.updateClusterInDatabase(dataSourceFileName,
                 outputTable, idColumn, clusterColumn, ids, Arrays.asList(cluster));
-        System.err.println(clusterCount + " total Clusters");
+        System.out.println(clusterCount + " total Clusters");
         return null;
     }
 
