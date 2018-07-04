@@ -31,6 +31,7 @@
  */
 package edu.temple.cla.papolicy.wolfgang.findnearduplcateclusters;
 
+import edu.temple.cla.papolicy.wolfgang.texttools.util.CommonFrontEnd;
 import edu.temple.cla.papolicy.wolfgang.texttools.util.Preprocessor;
 import edu.temple.cla.papolicy.wolfgang.texttools.util.Util;
 import edu.temple.cla.papolicy.wolfgang.texttools.util.Vocabulary;
@@ -133,28 +134,11 @@ public class Main implements Callable<Void> {
         List<SortedMap<Integer, Double>> attributes = new ArrayList<>();
         List<WordCounter> counts = new ArrayList<>();
         Vocabulary vocabulary = new Vocabulary();
-        Preprocessor preprocessor = new Preprocessor("porter", "true");
-        Util.readFromDatabase(dataSourceFileName,
-                tableName,
-                idColumn,
-                textColumn,
-                codeColumn,
-                false,
-                false,
-                false,
-                clusterColumn)
-                .forEach(m -> {
-                    ids.add((String) m.get("theID"));
-                    codes.add(Objects.toString(m.get("theCode")));
-                    String line = (String) m.get("theText");
-                    WordCounter counter = new WordCounter();
-                    preprocessor.preprocess(line)
-                            .forEach(word -> {
-                                counter.updateCounts(word);
-                                vocabulary.updateCounts(word);
-                            });
-                    counts.add(counter);
-                });
+            CommonFrontEnd commonFrontEnd = new CommonFrontEnd();
+            CommandLine commandLine = new CommandLine(commonFrontEnd);
+            commandLine.setUnmatchedArgumentsAllowed(true);
+            commandLine.parse(args);
+            commonFrontEnd.loadData(ids, codes, vocabulary, counts);
         vocabulary.computeProbabilities();
         counts.forEach((counter) -> {
             attributes.add(Util.computeAttributes(counter, vocabulary, 0.0));
@@ -195,7 +179,7 @@ public class Main implements Callable<Void> {
                     System.out.printf("%.0f Percent Complete %f items/sec %d total remaining%n",
                             percentComplete, rate * 100, (totalIterations - iterCount));
                     System.out.printf("%d minutes and %d sec estimated remaining%n", estMinutes, estSec);
-                    reportThreshold += 1.0;
+                    reportThreshold += 10.0;
                 }
             }
         }
@@ -212,8 +196,7 @@ public class Main implements Callable<Void> {
             }
         }
         System.out.println("Updating Database");
-        Util.updateClusterInDatabase(dataSourceFileName,
-                outputTable, idColumn, clusterColumn, ids, Arrays.asList(cluster));
+        commonFrontEnd.outputToDatabase(outputTable, clusterColumn, ids, Arrays.asList(cluster));
         System.out.println(clusterCount + " total Clusters");
         return null;
     }
