@@ -38,7 +38,9 @@ import edu.temple.cla.papolicy.wolfgang.texttools.util.Vocabulary;
 import edu.temple.cla.papolicy.wolfgang.texttools.util.WordCounter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedMap;
@@ -129,19 +131,18 @@ public class Main implements Callable<Void> {
 
     @Override
     public Void call() {
-        List<String> ids = new ArrayList<>();
-        List<String> codes = new ArrayList<>();
-        List<SortedMap<Integer, Double>> attributes = new ArrayList<>();
-        List<WordCounter> counts = new ArrayList<>();
-        Vocabulary vocabulary = new Vocabulary();
-            CommonFrontEnd commonFrontEnd = new CommonFrontEnd();
-            CommandLine commandLine = new CommandLine(commonFrontEnd);
-            commandLine.setUnmatchedArgumentsAllowed(true);
-            commandLine.parse(args);
-            commonFrontEnd.loadData(ids, codes, vocabulary, counts);
+        List<Map<String, Object>> cases = new ArrayList<>();
+        CommonFrontEnd commonFrontEnd = new CommonFrontEnd();
+        CommandLine commandLine = new CommandLine(commonFrontEnd);
+        commandLine.setUnmatchedArgumentsAllowed(true);
+        commandLine.parse(args);
+        Vocabulary vocabulary = commonFrontEnd.loadData(cases);
         vocabulary.computeProbabilities();
-        counts.forEach((counter) -> {
-            attributes.add(Util.computeAttributes(counter, vocabulary, 0.0));
+        List<SortedMap<Integer, Double>> attributes = new ArrayList<>(); 
+        cases.forEach((trainingCase) -> {
+            WordCounter counter = (WordCounter)trainingCase.get("counts");
+            SortedMap<Integer, Double> attributeSet = Util.computeAttributes(counter, vocabulary, 0.0);
+            attributes.add(attributeSet);
         });
         // Build set of near duplicate pairs
         int numRows = attributes.size();
@@ -185,40 +186,38 @@ public class Main implements Callable<Void> {
         }
         System.out.println("Done Computing dot products");
         System.out.println("Filtering clusters");
-        List<List<Integer>> clusters = filterClusters(d, ids, codes);
+        List<List<Integer>> clusters = filterClusters(d, cases);
         System.out.println("Assigning cluster ID");
         int clusterCount = clusters.size();
-        Integer[] cluster = new Integer[numRows];
         for (int i = 0; i < clusters.size(); i++) {
             List<Integer> aCluster = clusters.get(i);
             for (int index : aCluster) {
-                cluster[index] = i;
+                cases.get(index).put("ClusterId", i);
             }
         }
         System.out.println("Updating Database");
-        commonFrontEnd.outputToDatabase(outputTable, clusterColumn, ids, Arrays.asList(cluster));
+        commonFrontEnd.outputToDatabase(outputTable, clusterColumn, cases, "ClusterId");
         System.out.println(clusterCount + " total Clusters");
         return null;
     }
 
     private List<List<Integer>> filterClusters(DisjointSet<Integer> d,
-            final List<String> ids, List<String> codes) {
+            final List<Map<String, Object>> cases) {
         List<List<Integer>> clusters = new ArrayList<>();
         d.stream().filter(aCluster -> (aCluster.size() > 1 || maxClusters > 0))
-                .filter(aCluster -> (filterCluster(aCluster, ids, codes) || maxClusters > 0))
+                .filter(aCluster -> (filterCluster(aCluster, cases) || maxClusters > 0))
                 .forEach(aCluster -> clusters.add(new ArrayList<>(aCluster)));
         return clusters;
     }
 
-    private boolean filterCluster(Set<Integer> aCluster, List<String> ids,
-            List<String> codes) {
+    private boolean filterCluster(Set<Integer> aCluster, List<Map<String, Object>> cases) {
         boolean codesAllEqual = false;
         boolean containsTargetSession = false;
         String currentCode = null;
         for (Integer index : aCluster) {
-            String id = ids.get(index);
+            String id = cases.get(index).get("theID").toString();
             containsTargetSession |= id.startsWith(targetSession);
-            String thisCode = codes.get(index);
+            String thisCode = cases.get(index).get("theCode").toString();
             if (currentCode == null) {
                 currentCode = thisCode;
                 if (currentCode != null) {
