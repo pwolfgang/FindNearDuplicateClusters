@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>edu.temple.cla.papolicy.wolfgang.texttools</groupId>
     <artifactId>FindNearDuplicateClusters</artifactId>
-    <version>1.0.2</version>
+    <version>1.1.0</version>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -46,7 +46,7 @@
         <dependency>
             <groupId>edu.temple.cla.papolicy.wolfgang.texttools</groupId>
             <artifactId>TextToolsUtil</artifactId>
-            <version>1.3.0</version>
+            <version>1.3.1</version>
         </dependency>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
