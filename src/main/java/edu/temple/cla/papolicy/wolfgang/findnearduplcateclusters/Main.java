@@ -217,7 +217,7 @@ public class Main implements Callable<Void> {
         for (Integer index : aCluster) {
             String id = cases.get(index).get("theID").toString();
             containsTargetSession |= id.startsWith(targetSession);
-            String thisCode = cases.get(index).get("theCode").toString();
+            String thisCode = Objects.toString(cases.get(index).get("theCode"));
             if (currentCode == null) {
                 currentCode = thisCode;
                 if (currentCode != null) {
