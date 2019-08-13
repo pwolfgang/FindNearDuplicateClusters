@@ -137,7 +137,6 @@ public class Main implements Callable<Void> {
         commandLine.setUnmatchedArgumentsAllowed(true);
         commandLine.parse(args);
         Vocabulary vocabulary = commonFrontEnd.loadData(cases);
-        vocabulary.computeProbabilities();
         List<SortedMap<Integer, Double>> attributes = new ArrayList<>(); 
         cases.forEach((trainingCase) -> {
             WordCounter counter = (WordCounter)trainingCase.get("counts");
